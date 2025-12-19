@@ -40,20 +40,12 @@ router.get("/sensors", (_req, res) => {
 
 router.get("/prediction-adjusted", async (_req, res) => {
   const weather = await getWeather();
-    const device = devices.find(d => d.type === "AC");
-    if (!device) {
-    return res.status(400).json({ error: "No AC device" });
-    }
+  const device = devices.find(d => d.type === "AC");
 
-    const sensor = sensors.find(s => s.roomId === device.roomId);
-    if (!sensor) {
-    return res.status(400).json({ error: "No matching sensor" });
-    }
+  if (!device) return res.json({ error: "No AC device" });
 
-
-  if (!sensor || !device) {
-    return res.status(400).json({ error: "No sensor/device" });
-  }
+  const sensor = sensors.find(s => s.roomId === device.roomId);
+  if (!sensor) return res.json({ error: "No sensor" });
 
   const base = predictEnergy({
     hour: new Date().getHours(),
@@ -64,11 +56,11 @@ router.get("/prediction-adjusted", async (_req, res) => {
     householdSize: 3,
   });
 
-  // Option B logic (same as agent)
   let adjusted = base.predictedEnergyKWh;
-  adjusted += (sensor.temperature - 26) * 0.12;
-  if (!sensor.occupancy) adjusted -= 0.4;
-  adjusted = Math.max(0.5, Number(adjusted.toFixed(2)));
+  adjusted += (sensor.temperature - 26) * 0.15;
+  if (!sensor.occupancy) adjusted -= 0.5;
+
+  adjusted = Math.max(0.6, Number(adjusted.toFixed(2)));
 
   res.json({
     base: base.predictedEnergyKWh,

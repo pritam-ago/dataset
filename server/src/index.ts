@@ -39,6 +39,4 @@ app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
 
-setInterval(() => {
-  simulateSensors();
-}, 10_000);
+setInterval(simulateSensors, 8000);
